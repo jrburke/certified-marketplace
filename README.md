@@ -40,24 +40,43 @@ This capability is really beneficial to the platform: it provides some real worl
 
 ## How
 
-Certified apps could be delivered in a similar fashion to privileged apps, but with some extra checks in place:
+Certified apps could be delivered in a similar fashion to privileged apps, but there is some extra things to to sort out:
 
-* The Marketplace should allow specifying Gecko version numbers that are compatible with a given app zip.
-* The Marketplace allows multiple app zips for a given app, that can be separated by Gecko version number.
-* The apps are signed by a key that prove they are from a blessed developer that has agreed to the certified contract. This signing verification may just need to happen on zip upload, as a start, although it could be extended to the device checking the signature.
-* The OS upgrade mechanism on the device needs to be changed: if the OS is updated, and the new Gecko is it a new version number, it needs to ensure it has access to the certified app versions for that Gecko version.
+### Marketplace
 
+1) The Marketplace should allow specifying Gecko version numbers that are compatible with a given app zip. This could be done in the marketplace registration pathway, would not need to be in the manifest.webapp. Could be a manifest thing too though.
+
+2) The Marketplace allows multiple app zips for a given app name, to allow different app releases per Gecko version number. Maybe that falls out naturally from 1).
+
+
+3) The apps are signed by a key that prove they are from a blessed developer that has agreed to the certified contract. This signing verification may just need to happen on zip upload, as a start, although it could be extended to the device checking the signature.
+
+4) Allow storing/fetching localization too? See **App construction** notes.
+
+### B2G
+
+1) The OS upgrade mechanism on the device needs to be changed: if the OS is updated, and the new Gecko is it a new version number, it needs to ensure it has access to the certified app versions for that Gecko version.
+
+2) On install, fetch appropriate localization too? Maybe just leave that for the app to do.
+
+### App construction
+
+1) The l10n pathway needs to allow loading localizations from an app-local data store. For efficiency, apps installed from the marketplace should not include all possible localizations. Instead, the app should fetch the localization desired, and store it in a local data store.
+
+Sketch:
+
+* Store in IndexedDB, read out as JSON, to avoid CSP stuff.
+* Need a UI for "please wait, updating locale" when app detects language change, but does not have the localization. Need to account for failures/app being offline, no network.
+* Sort out where to ask for the l10n bundles. Perhaps Marketplace? Stored by signature of app zip (how to reflect that to app)?
+
+(On localizations, for the email app, the oauth settings to gmail, gmail shows some localizable strings from the oauth client ID profile, so the localizations go beyond just local localized string replacements. The oauth client ID and such could come from the l10n bundles though, or the app could build a way to fetch the oauth config based on localization. That data could be small enough to allow just bundling all possible options in the app zip.)
 
 ## Open questions
 
 Some of these relate to how to get smaller zip files as some devices are very storage and memory constrained:
 
-* How to deal with graphics: we have 1x, 2x, 2.5x, etc.. graphics for some things. Maybe the hope is to move to vector graphics for everything, but the platform may not move as fast. Maybe we just decide to deliver all the graphics in that case.
-* How to deal with localizations. We can avoid some overhead by only delivering localizations that are only used on the device. On localizations, for the email app, the oauth settings to gmail, gmail shows some localizable strings from the oauth client ID profile, so the localizations go beyond just local localized string replacements.
+* How to deal with graphics: we have 1x, 2x, 2.5x, etc.. graphics for some things. Maybe the hope is to move to vector graphics for everything, but the platform may not move as fast. Maybe we just decide to deliver all the graphics in the interim while vector options are fully realized.
 
-It may make sense to allow different app zips per device resolution and even per locale.
-
-Or in the case of locale, perhaps a separate mechanism to allow installing of new locales via localization zips.
 
 
 
